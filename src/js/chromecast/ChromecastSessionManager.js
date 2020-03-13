@@ -93,6 +93,10 @@ class ChromecastSessionManager {
          this._reloadTech();
       } else if (event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
          this._onSessionResumed();
+      } else if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
+         hasConnected = true;
+         this.player.trigger('chromecastConnected');
+         this._reloadTech();
       }
    }
 
@@ -171,27 +175,14 @@ class ChromecastSessionManager {
     * Video.js player does not have a source.
     */
    openCastMenu() {
-      var onSessionSuccess;
-
       if (!this.player.currentSource()) {
          // Do not cast if there is no media item loaded in the player
          return;
       }
-      onSessionSuccess = function() {
-         ChromecastSessionManager.hasConnected = true;
-         this.player.trigger('chromecastConnected');
-         this._reloadTech();
-      }.bind(this);
 
       // It is the `requestSession` function call that actually causes the cast menu to
       // open.
-      // The second parameter to `.then` is an error handler. We use a noop function here
-      // because we handle errors in the ChromecastTech class and we do not want an
-      // error to bubble up to the console. This error handler is also triggered when
-      // the user closes out of the chromecast selector pop-up without choosing a
-      // casting destination.
-      this.getCastContext().requestSession()
-         .then(onSessionSuccess, function() { /* noop */ });
+      this.getCastContext().requestSession();
    }
 
    /**
