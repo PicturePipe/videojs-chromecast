@@ -6,7 +6,7 @@
 
 var path = require('path'),
     join = path.join.bind(path),
-    nodeSass = require('sass');
+    sass = require('sass');
 
 module.exports = function(grunt) {
 
@@ -122,7 +122,7 @@ module.exports = function(grunt) {
             ],
          },
          options: {
-            implementation: nodeSass,
+            implementation: sass,
             sourceMap: DEBUG,
             indentWidth: 3,
             outputStyle: DEBUG ? 'expanded' : 'compressed',
