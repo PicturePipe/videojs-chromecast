@@ -51,6 +51,7 @@ ChromecastTech = {
       this.on('dispose', this._onDispose.bind(this));
 
       this._hasPlayedAnyItem = false;
+      this._onChangeSubtitleTrack = options.onChangeSubtitleTrackFn || function() { /* noop */ };
       this._requestTitle = options.requestTitleFn || function() { /* noop */ };
       this._requestSubtitle = options.requestSubtitleFn || function() { /* noop */ };
       this._requestCustomData = options.requestCustomDataFn || function() { /* noop */ };
@@ -297,9 +298,11 @@ ChromecastTech = {
       request.currentTime = startTime === undefined ? loadSource.startTime : startTime;
       request.customData = this._requestCustomData();
       if (loadSource.credentials) {
-         request.credentials = loadSource.credentials;
-         request.credentialsType = loadSource.credentialsType;
+         const credentialsData = new chrome.cast.CredentialsData(loadSource.credentials);
+
+         request = { ...request, ...credentialsData };
       }
+
       this._isMediaLoading = true;
       this._hasPlayedCurrentItem = false;
       this._ui.updateTitle(title);
@@ -649,7 +652,19 @@ ChromecastTech = {
    _listenToPlayerControllerEvents: function() {
       var eventTypes = cast.framework.RemotePlayerEventType;
 
+      this._addEventListener(this._remotePlayerController, eventTypes.MEDIA_INFO_CHANGED, () => {
+         if (typeof this._getMediaSession().activeTrackIds[0] === 'number') {
+            const id = this._getMediaSession().activeTrackIds[0];
 
+            const tracks = this._getMediaSession().media.tracks;
+
+            const name = tracks[id].name;
+
+            this._onChangeSubtitleTrack({ name });
+         } else {
+            this._onChangeSubtitleTrack(null);
+         }
+      }, this);
       this._addEventListener(this._remotePlayerController, eventTypes.PLAYER_STATE_CHANGED, this._onPlayerStateChanged, this);
       this._addEventListener(this._remotePlayerController, eventTypes.VOLUME_LEVEL_CHANGED, this._triggerVolumeChangeEvent, this);
       this._addEventListener(this._remotePlayerController, eventTypes.IS_MUTED_CHANGED, this._triggerVolumeChangeEvent, this);
