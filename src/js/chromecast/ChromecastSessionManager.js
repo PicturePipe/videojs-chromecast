@@ -210,6 +210,13 @@ class ChromecastSessionManager {
           wasPlaying = sessionPlaying || !player.paused(),
           sources = player.currentSources();
 
+      // Add currentTime as startTime so that ChromeCast will start playing at the current time
+      // player.currentTime will be calleed too early to have any effect on ChromeCast playback
+      // position, so playback in ChromeCast will start at 00:00 without this.
+      if (currentTime !== undefined) {
+          sources[0].startTime = currentTime;
+      }
+
       // Reload the current source(s) to re-lookup and use the currently available Tech.
       // The chromecast Tech gets used if `ChromecastSessionManager.isChromecastConnected`
       // is true (effectively, if a chromecast session is currently in progress),
