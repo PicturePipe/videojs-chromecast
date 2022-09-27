@@ -94,7 +94,7 @@ class ChromecastSessionManager {
       } else if (event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
          this._onSessionResumed();
       } else if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
-         hasConnected = true;
+         ChromecastSessionManager.hasConnected = true;
          this.player.trigger('chromecastConnected');
          this._reloadTech();
       }
