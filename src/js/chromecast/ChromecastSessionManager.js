@@ -205,7 +205,7 @@ class ChromecastSessionManager {
       // player.currentTime will be calleed too early to have any effect on ChromeCast playback
       // position, so playback in ChromeCast will start at 00:00 without this.
       if (currentTime !== undefined) {
-          sources[0].startTime = currentTime;
+          sources.forEach((source) => source.startTime = currentTime);
       }
 
       // Reload the current source(s) to re-lookup and use the currently available Tech.
