@@ -33,7 +33,6 @@ class ChromecastSessionManager {
 
       this._sessionListener = this._onSessionStateChange.bind(this);
       this._castListener = this._onCastStateChange.bind(this);
-
       this._addCastContextEventListeners();
 
       // Remove global event listeners when this player instance is destroyed to prevent
@@ -199,7 +198,8 @@ class ChromecastSessionManager {
       var player = this.player,
           currentTime = sessionCurrentTime || player.currentTime(),
           wasPlaying = sessionPlaying || !player.paused(),
-          sources = player.currentSources();
+          sources = this._playerSrc || player.currentSources();
+
 
       // Add currentTime as startTime so that ChromeCast will start playing at the current time
       // player.currentTime will be calleed too early to have any effect on ChromeCast playback
@@ -213,6 +213,7 @@ class ChromecastSessionManager {
       // is true (effectively, if a chromecast session is currently in progress),
       // otherwise Video.js continues to search through the Tech list for other eligible
       // Tech to use, such as the HTML5 player.
+
       player.src(sources);
       player.ready(function() {
          if (wasPlaying) {

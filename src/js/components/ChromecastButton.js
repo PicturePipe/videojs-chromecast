@@ -61,8 +61,12 @@ ChromecastButton = {
     * @param el {DOMElement}
     * @see {@link http://docs.videojs.com/Button.html#buildCSSClass|Button#buildCSSClass}
     */
-   buildCSSClass: function() {
-      return 'vjs-chromecast-button ' + (this._isChromecastConnected ? 'vjs-chromecast-casting-state ' : '') +
+   buildCSSClass: function(isChromecastConnected) {
+      // cast.framework.CastContext.getInstance().getCastState() returns `CONNECTED` later then `_onChromecastConnected` event is triggered
+      // for that reason we need additional `isChomecastConnected` flag to determine if build was triggered by onChromecastConnected or onChromecastDisconnected events
+      isChromecastConnected = typeof isChromecastConnected === 'boolean' ? isChromecastConnected : cast.framework.CastContext.getInstance().getCastState() === 'CONNECTED';
+
+      return 'vjs-chromecast-button ' + ((isChromecastConnected) ? 'vjs-chromecast-casting-state ' : '') +
          this.constructor.super_.prototype.buildCSSClass();
    },
 
@@ -85,8 +89,7 @@ ChromecastButton = {
     * @private
     */
    _onChromecastConnected: function() {
-      this._isChromecastConnected = true;
-      this._reloadCSSClasses();
+      this._reloadCSSClasses(true);
    },
 
    /**
@@ -95,8 +98,7 @@ ChromecastButton = {
     * @private
     */
    _onChromecastDisconnected: function() {
-      this._isChromecastConnected = false;
-      this._reloadCSSClasses();
+      this._reloadCSSClasses(false);
    },
 
    /**
@@ -123,11 +125,11 @@ ChromecastButton = {
     *
     * @private
     */
-   _reloadCSSClasses: function() {
+   _reloadCSSClasses: function(isChromecastConnected) {
       if (!this.el_) {
          return;
       }
-      this.el_.className = this.buildCSSClass();
+      this.el_.className = this.buildCSSClass(isChromecastConnected);
    },
 };
 
